@@ -1,0 +1,80 @@
+# This file describes TWO Kubernetes objects, separated by "---":
+# 1. A Deployment — tells Kubernetes "run this container, keep it running,
+#    restart it if it crashes."
+# 2. A Service — gives that running container(s) a stable network address
+#    that other things (including, for this one service, your laptop) can
+#    reach.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway         # the name this Deployment is known by in the cluster
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1                # how many copies (pods) to run — 1 is fine for local dev
+  selector:
+    matchLabels:
+      app: api-gateway       # tells the Deployment which pods it's responsible for
+  template:                  # this is the actual "recipe" for each pod
+    metadata:
+      labels:
+        app: api-gateway     # must match the selector above
+    spec:
+      containers:
+        - name: api-gateway
+          image: gym-api-gateway:dev   # must match what you tagged with "docker build -t"
+          imagePullPolicy: IfNotPresent # don't try to pull from a registry —
+                                         # use the image already loaded into kind
+          ports:
+            - containerPort: 8080      # the port the app listens on INSIDE the container
+          env:
+            # These become process.env.X inside the running container —
+            # exactly what src/index.js and routes.config.js read from.
+            - name: PORT
+              value: "8080"
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:4000"
+            - name: OPERATIONS_SERVICE_URL
+              value: "http://operations-service:4001"
+            - name: PEOPLE_SERVICE_URL
+              value: "http://people-service:4002"
+            - name: SOCIAL_SERVICE_URL
+              value: "http://social-service:4003"
+            - name: COMMERCE_SERVICE_URL
+              value: "http://commerce-service:4004"
+            - name: AI_SERVICE_URL
+              value: "http://ai-service:4005"
+          readinessProbe:
+            # Kubernetes calls this repeatedly BEFORE sending real traffic
+            # to this pod — confirms the app is actually ready.
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+          livenessProbe:
+            # Kubernetes calls this throughout the pod's life — if it ever
+            # fails repeatedly, Kubernetes assumes the app is stuck/broken
+            # and restarts the container automatically.
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    app: api-gateway   # routes traffic to any pod with this label
+  ports:
+    - port: 8080        # the port other things INSIDE the cluster use to reach this service
+      targetPort: 8080  # the port the container actually listens on (matches containerPort above)
+      nodePort: 30080    # the port exposed on the KIND NODE itself — see kind-config-reference.yaml
+                          # for how this becomes reachable at localhost:8080 on your laptop
+  type: NodePort         # NodePort = reachable from outside the cluster.
+                         # Every OTHER service (operations, people, etc.) should use
+                         # "type: ClusterIP" instead (the default), meaning
+                         # "only reachable from inside the cluster" — because
+                         # only the gateway should ever be hit directly by clients.
