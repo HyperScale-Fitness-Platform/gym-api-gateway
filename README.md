@@ -12,15 +12,6 @@ exactly three things, and nothing else:
    `x-user-email`, `x-user-role` headers, so other services don't need to
    re-verify tokens themselves.
 
-No business logic belongs in this repo. If you find yourself writing an
-`if` statement about bookings or payments here, that logic belongs in one
-of the actual service repos instead.
-
-## Why plain JavaScript instead of TypeScript
-
-No compile step — you edit a `.js` file and `nodemon` restarts the server
-directly. Fewer moving parts, faster to get started, at the cost of not
-catching type errors before runtime. Fine tradeoff for a service this thin.
 
 ## File-by-file explanation
 
@@ -90,7 +81,7 @@ created (`kind create cluster --name gym-dev --config kind-config.yaml`).
 ## Security note
 
 Downstream services (`operations`, `people`, `social`, `commerce`, `ai`)
-trust the `x-user-*` headers completely, with no re-verification. This
+trust the `user-*` headers completely, with no re-verification. This
 means those services must **never** be reachable directly from outside the
 cluster — only from the gateway. In production this gets enforced with a
 Kubernetes NetworkPolicy; for local dev, it's just a convention to keep in
