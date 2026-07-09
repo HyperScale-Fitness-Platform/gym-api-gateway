@@ -1,4 +1,4 @@
-# gym-api-gateway (plain JavaScript)
+# API Gateway
 
 Single entry point for every client (mobile, web, admin). This service does
 exactly three things, and nothing else:
