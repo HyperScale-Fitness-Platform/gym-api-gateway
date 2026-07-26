@@ -16,7 +16,7 @@ const app = express();
 // Update the origin array if your frontend runs on a different port (e.g., Vite defaults to 5173, CRA to 3000).
 app.use(cors({
   origin: ["http://localhost:3000", "http://localhost:5173"], 
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true // Required if you plan to send JWT cookies later
 }));
 
