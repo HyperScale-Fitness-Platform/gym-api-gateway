@@ -10,7 +10,7 @@ const routes = [
     requiresAuth: true,
   },
   {
-    prefix: "/people",
+    prefix: "/api/profiles",
     target: process.env.PEOPLE_SERVICE_URL,
     requiresAuth: true,
   },
