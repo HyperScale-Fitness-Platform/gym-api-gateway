@@ -12,10 +12,16 @@ const { errorHandler } = require("./middleware/errorHandler.middleware");
 
 const app = express();
 
-// Configure CORS to allow your React frontend to connect.
-// Update the origin array if your frontend runs on a different port (e.g., Vite defaults to 5173, CRA to 3000).
+// Configure CORS to allow the React frontend to connect.
+// The origin list can be overridden at deploy time via the CORS_ORIGINS env var
+// (comma-separated). In production the frontend is served from the same origin
+// as the gateway (shared ALB), so browser calls are same-origin and not blocked.
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:3000", "http://localhost:5173"];
+
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:5173"], 
+  origin: corsOrigins, 
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true // Required if you plan to send JWT cookies later
 }));

@@ -7,7 +7,7 @@ data:
   PORT: "8080"
   AUTH_SERVICE_URL: "http://auth-service:4000"
   OPERATIONS_SERVICE_URL: "http://operations-service:4001"
-  PEOPLE_SERVICE_URL: "http://people-service:4002"
+  PEOPLE_SERVICE_URL: "http://gym-profile-service:4002"
   SOCIAL_SERVICE_URL: "http://social-service:4003"
   PAYMENT_SERVICE_URL: "http://payment-service:4004"
   COMMERCE_SERVICE_URL: "http://commerce-service:4005"
