@@ -20,8 +20,18 @@ const routes = [
     requiresAuth: true,
   },
   {
+    prefix: "/chat",
+    target: process.env.SOCIAL_SERVICE_URL,
+    requiresAuth: true,
+  },
+  {
     prefix: "/commerce",
     target: process.env.COMMERCE_SERVICE_URL,
+    requiresAuth: true,
+  },
+  {
+    prefix: "/payments",
+    target: process.env.PAYMENT_SERVICE_URL,
     requiresAuth: true,
   },
   {
