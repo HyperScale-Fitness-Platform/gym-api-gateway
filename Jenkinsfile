@@ -70,7 +70,7 @@ pipeline {
 
         stage('Update Image Tag in GitOps Repo') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     sh """
                         rm -rf gitops-repo
                         git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/HyperScale-Fitness-Platform/gym-platform-gitops.git gitops-repo
@@ -84,11 +84,17 @@ pipeline {
                         git config user.name "Jenkins CI"
                         
                         git add kustomization.yaml
-                        git commit -m "ci(api-gateway): update ${params.ENVIRONMENT} image tag -> ${env.IMAGE_TAG}"
                         
-                        # Rebase before pushing to prevent race condition conflicts if run in parallel
-                        git pull --rebase origin main
-                        git push origin main
+                        # Only commit and push if there are actual diffs
+                        if ! git diff --cached --quiet; then
+                            git commit -m "ci(api-gateway): update ${params.ENVIRONMENT} image tag -> ${env.IMAGE_TAG}"
+                            
+                            # Pull rebase before pushing to avoid conflicts with parallel service builds
+                            git pull --rebase origin main
+                            git push origin main
+                        else
+                            echo "No image tag changes detected. Skipping commit."
+                        fi
                     """
                 }
             }
