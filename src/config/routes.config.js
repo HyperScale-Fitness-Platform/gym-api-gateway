@@ -30,6 +30,11 @@ const routes = [
     requiresAuth: true,
   },
   {
+    prefix: "/payments",
+    target: process.env.PAYMENT_SERVICE_URL,
+    requiresAuth: true,
+  },
+  {
     prefix: "/ai",
     target: process.env.AI_SERVICE_URL,
     requiresAuth: true,
