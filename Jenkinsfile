@@ -61,10 +61,12 @@ pipeline {
         stage('Push Image to AWS ECR') {
             steps {
                 echo "🚀 Pushing image artifact [${env.IMAGE_TAG}] to AWS ECR..."
-                sh """
-                    docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}:${env.IMAGE_TAG}
-                    docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}:latest
-                """
+                retry(3) {
+                    sh """
+                        docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}:${env.IMAGE_TAG}
+                        docker push ${env.AWS_ACCOUNT_ID}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO_NAME}:latest
+                    """
+                }
             }
         }
 
