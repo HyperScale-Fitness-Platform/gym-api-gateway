@@ -23,12 +23,54 @@ pipeline {
         AWS_ACCOUNT_ID        = credentials('aws-account-id')
 
         GITOPS_REPO_URL = "https://github.com/HyperScale-Fitness-Platform/gym-platform-gitops.git"
+
+        PATH  = "${WORKSPACE}/.tools/bin:${env.PATH}"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Bootstrap CLI Tools') {
+            steps {
+                sh '''
+                    set -e
+                    TOOL_BIN="${WORKSPACE}/.tools/bin"
+                    mkdir -p "${TOOL_BIN}"
+
+                    # 1. Install AWS CLI v2 if missing
+                    if ! command -v aws >/dev/null 2>&1; then
+                        echo "Installing AWS CLI v2..."
+                        curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+                        unzip -q -o /tmp/awscliv2.zip -d /tmp/
+                        /tmp/aws/install --install-dir "${WORKSPACE}/.tools/aws-cli" --bin-dir "${TOOL_BIN}" --update
+                        rm -rf /tmp/aws /tmp/awscliv2.zip
+                    fi
+
+                    # 2. Install kubectl if missing
+                    if ! command -v kubectl >/dev/null 2>&1; then
+                        echo "Installing kubectl..."
+                        curl -sLO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                        chmod +x kubectl
+                        mv kubectl "${TOOL_BIN}/"
+                    fi
+
+                    # 3. Install envsubst if missing
+                    if ! command -v envsubst >/dev/null 2>&1; then
+                        echo "Installing envsubst..."
+                        curl -sL https://github.com/a8m/envsubst/releases/download/v1.2.0/envsubst-`uname -s`-`uname -m` -o "${TOOL_BIN}/envsubst"
+                        chmod +x "${TOOL_BIN}/envsubst"
+                    fi
+
+                    # Verification (avoid -v on Go binary)
+                    echo "--- Tool Versions & Checks ---"
+                    aws --version
+                    kubectl version --client
+                    echo "envsubst available at: $(which envsubst)"
+                '''
             }
         }
 
