@@ -28,6 +28,8 @@ const routes = [
     prefix: "/commerce",
     target: process.env.COMMERCE_SERVICE_URL,
     requiresAuth: true,
+    // catalog-service exposes /api/products, not /commerce/api/products.
+    preservePrefix: false,
   },
   {
     prefix: "/payments",
