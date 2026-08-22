@@ -32,6 +32,13 @@ const routes = [
     preservePrefix: false,
   },
   {
+    prefix: "/orders",
+    target: process.env.ORDER_SERVICE_URL,
+    requiresAuth: true,
+    // order-service exposes /api/cart and /api/orders directly.
+    preservePrefix: false,
+  },
+  {
     prefix: "/payments",
     target: process.env.PAYMENT_SERVICE_URL,
     requiresAuth: true,
