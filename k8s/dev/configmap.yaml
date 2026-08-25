@@ -10,5 +10,8 @@ data:
   PEOPLE_SERVICE_URL: "http://people-service:4002"
   SOCIAL_SERVICE_URL: "http://social-service:4003"
   COMMERCE_SERVICE_URL: "http://commerce-service:4004"
+  ORDER_SERVICE_URL: "http://order-service:3002"
   PAYMENT_SERVICE_URL: "http://payment-service:4004"
   AI_SERVICE_URL: "http://ai-service:4005"
+  AWS_REGION: "us-east-1"
+  PRODUCT_IMAGES_BUCKET: "gym-platform-product-images"
