@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: api-gateway-config
-  namespace: gym-prod
+  namespace: gym-dev
 data:
   PORT: "8080"
   AUTH_SERVICE_URL: "http://auth-service:4000"
