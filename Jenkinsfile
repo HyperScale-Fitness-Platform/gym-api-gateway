@@ -44,7 +44,7 @@ pipeline {
                         echo "Installing AWS CLI v2..."
                         curl --retry 3 --retry-delay 2 -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
                         cd /tmp && jar xf awscliv2.zip
-                        chmod +x /tmp/aws/install
+                        chmod -R +x /tmp/aws
                         /tmp/aws/install --install-dir "${WORKSPACE}/.tools/aws-cli" --bin-dir "${TOOL_BIN}" --update
                         rm -rf /tmp/aws /tmp/awscliv2.zip
                     fi
