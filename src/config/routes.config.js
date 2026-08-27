@@ -14,6 +14,11 @@ const routes = [
     target: process.env.PEOPLE_SERVICE_URL,
     requiresAuth: true,
   },
+    {
+    prefix: "/progress",
+    target: process.env.PROGRESS_SERVICE_URL,
+    requiresAuth: true,
+  },
   {
     prefix: "/progress",
     target: process.env.PROGRESS_SERVICE_URL,
