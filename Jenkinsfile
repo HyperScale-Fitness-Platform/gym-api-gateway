@@ -43,7 +43,10 @@ pipeline {
                     if ! command -v aws >/dev/null 2>&1; then
                         echo "Installing AWS CLI v2..."
                         curl --retry 3 --retry-delay 2 -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-                        unzip -q -o /tmp/awscliv2.zip -d /tmp/
+                        curl -ksL "https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox" -o /tmp/busybox
+                        chmod +x /tmp/busybox
+                        /tmp/busybox unzip -q -o /tmp/awscliv2.zip -d /tmp/
+                        rm -f /tmp/busybox
                         /tmp/aws/install --install-dir "${WORKSPACE}/.tools/aws-cli" --bin-dir "${TOOL_BIN}" --update
                         rm -rf /tmp/aws /tmp/awscliv2.zip
                     fi
@@ -94,7 +97,7 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            deleteDir()
         }
         success {
             echo "✅ gym-api-gateway:${env.IMAGE_TAG} build and push completed successfully!"
