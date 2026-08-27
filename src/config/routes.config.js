@@ -15,6 +15,14 @@ const routes = [
     requiresAuth: true,
   },
   {
+    prefix: "/progress",
+    target: process.env.PROGRESS_SERVICE_URL,
+    requiresAuth: true,
+    // progress-service already mounts its routes under /progress
+    // (/progress, /progress/inbody, /progress/exercise-plans, ...), so keep
+    // the prefix when forwarding.
+  },
+  {
     prefix: "/social",
     target: process.env.SOCIAL_SERVICE_URL,
     requiresAuth: true,
