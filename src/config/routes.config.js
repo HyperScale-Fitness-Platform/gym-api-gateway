@@ -52,6 +52,15 @@ const routes = [
     requiresAuth: true,
   },
   {
+    prefix: "/webhooks",
+    target: process.env.PAYMENT_SERVICE_URL,
+    requiresAuth: false,
+    // Stripe POSTs to /webhooks/stripe from the public internet.
+    // No JWT — payment-service verifies the Stripe-Signature header itself.
+    // The raw body is streamed through (the gateway only json-parses /uploads),
+    // which Stripe's signature check requires.
+  },
+  {
     prefix: "/ai",
     target: process.env.AI_SERVICE_URL,
     requiresAuth: true,
