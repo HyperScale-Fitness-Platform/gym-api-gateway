@@ -1,14 +1,6 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['dev', 'prod'],
-            description: 'Target environment overlay'
-        )
-    }
-
     environment {
         ECR_REPO_NAME = "gym-api-gateway"
         AWS_REGION    = "us-east-1"
