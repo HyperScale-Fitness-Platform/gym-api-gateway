@@ -14,6 +14,23 @@ const uploadRoutes = require("./routes/upload.routes");
 
 const app = express();
 
+// Socket.IO (chat with trainer) lives in social-service. Its client hits
+// /socket.io/... for both the long-poll handshake AND the WebSocket upgrade.
+// This proxy is mounted at the root with a pathFilter (no prefix stripping —
+// the downstream server also serves /socket.io) and ws:true. It is registered
+// BEFORE the gateway's own cors() so socket.io requests use social-service's
+// CORS (origin:"*") rather than the gateway's allow-list — otherwise the
+// preflight for a cross-origin client comes back with no Allow-Origin and the
+// browser blocks the connection. The upgrade event is wired to the HTTP
+// server below; Express routing never sees a raw WebSocket upgrade.
+const socketProxy = createProxyMiddleware({
+  target: process.env.SOCIAL_SERVICE_URL,
+  changeOrigin: true,
+  ws: true,
+  pathFilter: "/socket.io",
+});
+app.use(socketProxy);
+
 // Configure CORS to allow the React frontend to connect.
 // The origin list can be overridden at deploy time via the CORS_ORIGINS env var
 // (comma-separated). In production the frontend is served from the same origin
@@ -43,20 +60,6 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/uploads", uploadRoutes);
-
-// Socket.IO (chat with trainer) lives in social-service. Its client hits
-// /socket.io/... for both the long-poll handshake AND the WebSocket upgrade,
-// so this proxy is mounted at the root with a pathFilter (no prefix stripping,
-// the downstream server also serves /socket.io) and ws:true. The upgrade
-// event is wired to the HTTP server below — Express routing never sees a
-// raw WebSocket upgrade.
-const socketProxy = createProxyMiddleware({
-  target: process.env.SOCIAL_SERVICE_URL,
-  changeOrigin: true,
-  ws: true,
-  pathFilter: "/socket.io",
-});
-app.use(socketProxy);
 
 registerProxies(app);
 
