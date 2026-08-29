@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors"); // Added CORS
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 // The .env file ONLY matters for local development — in Kubernetes, environment
 // variables are injected directly by the deployment.yaml instead, and
@@ -43,12 +44,28 @@ app.get("/health", (req, res) => {
 
 app.use("/uploads", uploadRoutes);
 
+// Socket.IO (chat with trainer) lives in social-service. Its client hits
+// /socket.io/... for both the long-poll handshake AND the WebSocket upgrade,
+// so this proxy is mounted at the root with a pathFilter (no prefix stripping,
+// the downstream server also serves /socket.io) and ws:true. The upgrade
+// event is wired to the HTTP server below — Express routing never sees a
+// raw WebSocket upgrade.
+const socketProxy = createProxyMiddleware({
+  target: process.env.SOCIAL_SERVICE_URL,
+  changeOrigin: true,
+  ws: true,
+  pathFilter: "/socket.io",
+});
+app.use(socketProxy);
+
 registerProxies(app);
 
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`api-gateway listening on port ${PORT}`);
 });
+
+server.on("upgrade", socketProxy.upgrade);
